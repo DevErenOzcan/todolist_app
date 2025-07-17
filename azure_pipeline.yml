@@ -2,46 +2,29 @@ trigger:
   - main
 
 pool:
-  vmImage: DevOpsLinuxPoolNew
+  name: DevOpsLinuxPoolNew
 
 stages:
-  - stage: Test
-    jobs:
-      - job: TestGoBackend
-        steps:
-          - task: GoTool@0
-            inputs:
-              version: '1.20'
-          - script: |
-              cd go_backend
-              go test -v simple_test.go
-            displayName: 'Run Go backend tests'
-
-      - job: TestReactFrontend
-        steps:
-          - task: NodeTool@0
-            inputs:
-              versionSpec: '16.x'
-          - script: |
-              cd react_frontend
-              npm install
-              npm test -- --watchAll=false
-            displayName: 'Run React frontend tests'
-
   - stage: Build
-    dependsOn: Test
     jobs:
       - job: BuildBackend
+        displayName: 'Build Backend'
         steps:
           - task: GoTool@0
             inputs:
               version: '1.20'
           - script: |
               cd go_backend
-              go build -v
-            displayName: 'Build Go backend'
+              go build -v -o app-backend
+            displayName: 'Build Go Backend'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathToPublish: '$(System.DefaultWorkingDirectory)/go_backend/app-backend'
+              artifactName: 'BackendArtifact'
+            displayName: 'Publish Backend Artifact'
 
       - job: BuildFrontend
+        displayName: 'Build Frontend'
         steps:
           - task: NodeTool@0
             inputs:
@@ -50,4 +33,53 @@ stages:
               cd react_frontend
               npm install
               npm run build
-            displayName: 'Build React frontend'
+            displayName: 'Build React Frontend'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathToPublish: '$(System.DefaultWorkingDirectory)/react_frontend/build'
+              artifactName: 'FrontendArtifact'
+            displayName: 'Publish Frontend Artifact'
+
+  - stage: Test
+    dependsOn: Build
+    jobs:
+      - job: TestGoBackend
+        displayName: 'Test Go Backend'
+        steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: 'current'
+              artifactName: 'BackendArtifact'
+            displayName: 'Download Backend Artifact'
+
+          - task: GoTool@0
+            inputs:
+              version: '1.20'
+
+          - script: |
+              # İndirilen artifact'ın yolu genellikle $(Pipeline.Workspace)/<artifact_adı> olacaktır.
+              # Örneğin: $(Pipeline.Workspace)/BackendArtifact/app-backend
+              # Eğer go test sadece kaynak kodu kullanıyorsa, bu indirme adımına ihtiyaç duymayabilirsiniz.
+              # Ancak derlenmiş çıktıyı test ediyorsanız, bu yol gereklidir.
+              cd $(System.DefaultWorkingDirectory)/go_backend 
+              go test -v simple_test.go
+            displayName: 'Run Go Backend Tests'
+
+      - job: TestReactFrontend
+        displayName: 'Test React Frontend'
+        steps:
+          - task: DownloadBuildArtifacts@0
+            inputs:
+              buildType: 'current'
+              artifactName: 'FrontendArtifact'
+            displayName: 'Download Frontend Artifact'
+
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '18.x'
+
+          - script: |
+              cd $(System.DefaultWorkingDirectory)/react_frontend
+              npm install
+              npm test -- --watchAll=false
+            displayName: 'Run React Frontend Tests'
