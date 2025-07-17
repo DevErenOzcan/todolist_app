@@ -15,7 +15,7 @@ func MainRoutes(router *gin.Engine) {
 
 func Apis(router *gin.Engine) {
 	app := router.Group("/api")
-	app.Use(middleware.JWTMiddleware("!!!!!**********privia_hub**********!!!!!"))
+	app.Use(middleware.JWTMiddleware("jwtsecretkey"))
 
 	{
 		// todos

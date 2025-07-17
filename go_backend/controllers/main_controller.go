@@ -8,7 +8,7 @@ import (
 	"todo_list_project/database"
 )
 
-var jwtKey = []byte("!!!!!**********privia_hub**********!!!!!")
+var jwtKey = []byte("jwtsecretkey")
 
 func Index(c *gin.Context) {
 	c.HTML(http.StatusOK, "index.html", gin.H{"title": "Ana Sayfa"})
