@@ -4,6 +4,9 @@ trigger:
 pool:
   name: DevOpsLinuxPoolNew
 
+variables:
+  dockerHubUsername: 'erenozcan17' # Replace with your Docker Hub username
+
 stages:
   - stage: Build
     jobs:
@@ -83,3 +86,35 @@ stages:
               npm install
               npm test -- --watchAll=false
             displayName: 'Run React Frontend Tests'
+
+  - stage: DockerBuildAndPush
+    displayName: 'Build And Push Docker Images'
+    dependsOn: Test
+    jobs:
+      - job: BuildAndPushBackendImage
+        displayName: 'Build and Push Backend Docker Image'
+        steps:
+          - task: Docker@2
+            displayName: 'Build and Push Backend Image'
+            inputs:
+              containerRegistry: 'dockerhub'
+              repository: '$(dockerHubUsername)/go_backend'  # Use your Docker Hub username
+              command: 'buildAndPush'
+              Dockerfile: 'go_backend/Dockerfile'
+              tags: |
+                $(Build.BuildId)
+                latest
+
+      - job: BuildAndPushFrontendImage
+        displayName: 'Build and Push Frontend Docker Image'
+        steps:
+          - task: Docker@2
+            displayName: 'Build and Push Frontend Image'
+            inputs:
+              containerRegistry: 'dockerhub'
+              repository: '$(dockerHubUsername)/react_frontend'  # Use your Docker Hub username
+              command: 'buildAndPush'
+              Dockerfile: 'react_frontend/Dockerfile'
+              tags: |
+                $(Build.BuildId)
+                latest
