@@ -17,12 +17,15 @@ spec:
     spec:
       containers:
         - name: react-app
-          image: erenozcan17/react_frontend:latest
+          image: erenozcan17/react_frontend:v2.3
           ports:
             - containerPort: 80
           env:
-            - name: REACT_APP_API_URL
-              value: "http://go-api-service"
+            - name: REACT_APP_API_BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: config
+                  key: REACT_APP_API_BASE_URL
           readinessProbe:
             httpGet:
               path: /

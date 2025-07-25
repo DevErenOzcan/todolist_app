@@ -42,7 +42,7 @@ const Step = () => {
   // Load steps
   const loadSteps = async () => {
     try {
-      const response = await authenticatedFetch(API_ENDPOINTS.STEP_BY_TODO_ID(todoId));
+      const response = await authenticatedFetch(API_ENDPOINTS.STEPS_BY_TODO_ID(todoId));
       if (response.ok) {
         const data = await response.json();
         setSteps(data || []);
@@ -62,12 +62,12 @@ const Step = () => {
     setIsLoading(true);
     const data = {
       name: stepName,
-      complete_perc: 0,
+      is_completed: false,
       is_deleted: false
     };
 
     try {
-      const response = await authenticatedFetch(API_ENDPOINTS.STEP_BY_TODO_ID(todoId), {
+      const response = await authenticatedFetch(API_ENDPOINTS.STEPS_BY_TODO_ID(todoId), {
         method: 'POST',
         body: JSON.stringify(data),
       });
@@ -89,20 +89,43 @@ const Step = () => {
   const deleteStep = async (stepId) => {
     try {
       const response = await authenticatedFetch(API_ENDPOINTS.STEP_BY_ID(stepId), {
-        method: 'DELETE',
+        method: 'DELETE'
       });
 
       if (response.ok) {
-        loadSteps();
+        loadSteps(); // Refresh steps
       } else {
-        console.error('Failed to delete step:', await response.text());
+        console.error('Failed to delete step');
       }
     } catch (error) {
       console.error('Error deleting step:', error);
     }
   };
 
-  // Mark step as finished
+  // Update step
+  const updateStep = async () => {
+    if (!updateStepName.trim()) return;
+
+    try {
+      const response = await authenticatedFetch(API_ENDPOINTS.STEP_BY_ID(currentStep.ID), {
+        method: 'PUT',
+        body: JSON.stringify({ name: updateStepName })
+      });
+
+      if (response.ok) {
+        setUpdateModalVisible(false);
+        setCurrentStep(null);
+        setUpdateStepName('');
+        loadSteps(); // Refresh steps
+      } else {
+        console.error('Failed to update step');
+      }
+    } catch (error) {
+      console.error('Error updating step:', error);
+    }
+  };
+
+  // Finish step
   const finishStep = async (step) => {
     try {
       const response = await authenticatedFetch(API_ENDPOINTS.STEP_BY_ID(step.id), {
@@ -110,42 +133,16 @@ const Step = () => {
         body: JSON.stringify({
           name: step.name,
           is_completed: true
-        }),
+        })
       });
 
       if (response.ok) {
-        loadSteps();
+        loadSteps(); // Refresh steps
       } else {
-        console.error('Failed to finish step:', await response.text());
+        console.error('Failed to finish step');
       }
     } catch (error) {
       console.error('Error finishing step:', error);
-    }
-  };
-
-  // Update step
-  const updateStep = async () => {
-    if (!currentStep || !updateStepName.trim()) return;
-
-    try {
-      const response = await authenticatedFetch(API_ENDPOINTS.STEP_BY_ID(currentStep.id), {
-        method: 'PUT',
-        body: JSON.stringify({
-          name: updateStepName,
-          is_completed: currentStep.is_completed
-        }),
-      });
-
-      if (response.ok) {
-        setUpdateModalVisible(false);
-        setCurrentStep(null);
-        setUpdateStepName('');
-        loadSteps();
-      } else {
-        console.error('Failed to update step:', await response.text());
-      }
-    } catch (error) {
-      console.error('Error updating step:', error);
     }
   };
 

@@ -26,12 +26,12 @@ const Todo = () => {
   // Get tasks from API
   const getTasks = async () => {
     try {
-      const response = await authenticatedFetch(API_ENDPOINTS.TODO);
+      const response = await authenticatedFetch(API_ENDPOINTS.TODOS);
       if (response.ok) {
         const data = await response.json();
-        setTasks(data || []);
+        setTasks(data);
       } else {
-        console.error('Failed to fetch tasks:', await response.text());
+        console.error('Failed to fetch tasks');
       }
     } catch (error) {
       console.error('Error fetching tasks:', error);
@@ -51,7 +51,7 @@ const Todo = () => {
     };
 
     try {
-      const response = await authenticatedFetch(API_ENDPOINTS.TODO, {
+      const response = await authenticatedFetch(API_ENDPOINTS.TODOS, {
         method: 'POST',
         body: JSON.stringify(data),
       });
@@ -73,13 +73,13 @@ const Todo = () => {
   const deleteTask = async (taskId) => {
     try {
       const response = await authenticatedFetch(API_ENDPOINTS.TODO_BY_ID(taskId), {
-        method: 'DELETE',
+        method: 'DELETE'
       });
 
       if (response.ok) {
-        getTasks();
+        getTasks(); // Refresh tasks
       } else {
-        console.error('Failed to delete task:', await response.text());
+        console.error('Failed to delete task');
       }
     } catch (error) {
       console.error('Error deleting task:', error);
@@ -88,24 +88,21 @@ const Todo = () => {
 
   // Update task
   const updateTask = async () => {
-    if (!currentTask || !updateTaskName.trim()) return;
+    if (!updateTaskName.trim()) return;
 
     try {
-      const response = await authenticatedFetch(API_ENDPOINTS.TODO_BY_ID(currentTask.id), {
+      const response = await authenticatedFetch(API_ENDPOINTS.TODO_BY_ID(currentTask.ID), {
         method: 'PUT',
-        body: JSON.stringify({
-          name: updateTaskName,
-          complete_perc: currentTask.complete_perc
-        }),
+        body: JSON.stringify({ todo_name: updateTaskName })
       });
 
       if (response.ok) {
         setUpdateModalVisible(false);
         setCurrentTask(null);
         setUpdateTaskName('');
-        getTasks();
+        getTasks(); // Refresh tasks
       } else {
-        console.error('Failed to update task:', await response.text());
+        console.error('Failed to update task');
       }
     } catch (error) {
       console.error('Error updating task:', error);

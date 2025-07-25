@@ -10,8 +10,16 @@ import (
 
 func JWTMiddleware(secretKey string) gin.HandlerFunc {
 	return func(c *gin.Context) {
+		// Handle preflight OPTIONS requests
+		if c.Request.Method == "OPTIONS" {
+			c.Next()
+			return
+		}
+
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
+			c.Header("Access-Control-Allow-Origin", c.GetHeader("Origin"))
+			c.Header("Access-Control-Allow-Credentials", "true")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header missing"})
 			return
 		}
@@ -33,6 +41,8 @@ func JWTMiddleware(secretKey string) gin.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
+			c.Header("Access-Control-Allow-Origin", c.GetHeader("Origin"))
+			c.Header("Access-Control-Allow-Credentials", "true")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
 			return
 		}
@@ -40,6 +50,8 @@ func JWTMiddleware(secretKey string) gin.HandlerFunc {
 		if claims, ok := token.Claims.(jwt.MapClaims); ok {
 			userID, ok := claims["user_id"].(float64)
 			if !ok {
+				c.Header("Access-Control-Allow-Origin", c.GetHeader("Origin"))
+				c.Header("Access-Control-Allow-Credentials", "true")
 				c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "user_id not found in token"})
 				return
 			}
@@ -50,6 +62,8 @@ func JWTMiddleware(secretKey string) gin.HandlerFunc {
 			}
 		} else {
 			// eğer user id alınamadıysa isteği middleware dan geçirmiyorum.
+			c.Header("Access-Control-Allow-Origin", c.GetHeader("Origin"))
+			c.Header("Access-Control-Allow-Credentials", "true")
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Invalid token claims"})
 			return
 		}

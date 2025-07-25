@@ -6,32 +6,53 @@ import (
 	"todo_list_project/middleware"
 )
 
+// SetupRoutes tüm route'ları yapılandırır
+func SetupRoutes(router *gin.Engine) {
+	// API grubu oluştur
+	api := router.Group("/api")
+
+	// Auth endpoints - JWT middleware olmadan
+	authGroup := api.Group("/auth")
+	{
+		authGroup.POST("/login", controller.Login)
+	}
+
+	// Protected endpoints - JWT middleware ile
+	protectedGroup := api.Group("")
+	protectedGroup.Use(middleware.JWTMiddleware("jwtsecretkey"))
+	{
+		// Todo endpoints
+		todoGroup := protectedGroup.Group("/todos")
+		{
+			todoGroup.GET("", controller.GetAllTodos)
+			todoGroup.POST("", controller.CreateTodo)
+			todoGroup.GET("/:id", controller.GetTodoByID)
+			todoGroup.PUT("/:id", controller.UpdateTodo)
+			todoGroup.DELETE("/:id", controller.DeleteTodo)
+		}
+
+		// Step endpoints
+		stepGroup := protectedGroup.Group("/steps")
+		{
+			// Todo ID ile step işlemleri
+			stepGroup.GET("/todo/:todo_id", controller.GetStepsByTodoID)
+			stepGroup.POST("/todo/:todo_id", controller.CreateStep)
+
+			// Step ID ile işlemler
+			stepGroup.GET("/:step_id", controller.GetStepByID)
+			stepGroup.PUT("/:step_id", controller.UpdateStep)
+			stepGroup.DELETE("/:step_id", controller.DeleteStep)
+		}
+	}
+}
+
+// Deprecated: Eski fonksiyonlar - geriye dönük uyumluluk için
 func MainRoutes(router *gin.Engine) {
-	router.GET("/", controller.Index)
-	router.POST("/", controller.Login)
-	router.GET("/todo", controller.Todo)
-	router.GET("/todo/:todo_id", controller.Step)
+	// Bu fonksiyon artık kullanılmıyor, SetupRoutes kullanın
+	SetupRoutes(router)
 }
 
 func Apis(router *gin.Engine) {
-	app := router.Group("/api")
-	app.Use(middleware.JWTMiddleware("jwtsecretkey"))
-
-	{
-		// todos
-		app.GET("/todo", controller.GetAllTodos)
-		app.POST("/todo", controller.CreateTodo)
-		app.GET("/todo/:id", controller.GetTodoByID)
-		app.PUT("/todo/:id", controller.UpdateTodo)
-		app.DELETE("/todo/:id", controller.DeleteTodo)
-
-		// steps with todo_id
-		app.GET("/step/tid/:todo_id", controller.GetStepsByTodoID)
-		app.POST("/step/tid/:todo_id", controller.CreateStep)
-
-		// steps with step_id
-		app.GET("/step/sid/:step_id", controller.GetStepByID)
-		app.PUT("/step/sid/:step_id", controller.UpdateStep)
-		app.DELETE("/step/sid/:step_id", controller.DeleteStep)
-	}
+	// Bu fonksiyon artık kullanılmıyor, SetupRoutes kullanın
+	SetupRoutes(router)
 }

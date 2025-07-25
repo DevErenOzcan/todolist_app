@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"os"
@@ -11,6 +12,7 @@ import (
 
 func main() {
 	origins := os.Getenv("CORS_ALLOW_ORIGINS")
+	fmt.Println("origins:", origins)
 	allowOrigins := strings.Split(origins, ",")
 
 	r := gin.Default()
@@ -19,15 +21,14 @@ func main() {
 	r.Use(cors.New(cors.Config{
 		AllowOrigins:     allowOrigins,
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
+		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization", "Cookie"},
+		ExposeHeaders:    []string{"Content-Length", "Set-Cookie"},
 		AllowCredentials: true,
 		MaxAge:           12 * time.Hour,
 	}))
 
-	// Route'ları bağla
-	routes.MainRoutes(r)
-	routes.Apis(r)
+	// Yeni route yapısını kullan
+	routes.SetupRoutes(r)
 
 	// Sunucuyu başlat
 	r.Run(":8080")

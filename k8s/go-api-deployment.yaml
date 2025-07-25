@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: go-api
-          image: erenozcan17/go_backend:latest
+          image: erenozcan17/go_backend:v2.0
           ports:
             - containerPort: 8080
           env:
@@ -46,6 +46,16 @@ spec:
                 secretKeyRef:
                   name: secret
                   key: DB_PASSWORD
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: secret
+                  key: JWT_SECRET
+            - name: CORS_ALLOW_ORIGINS
+              valueFrom:
+                configMapKeyRef:
+                  name: config
+                  key: CORS_ALLOW_ORIGINS
             - name: PORT
               valueFrom:
                 configMapKeyRef:

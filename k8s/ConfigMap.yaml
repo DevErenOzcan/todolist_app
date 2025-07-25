@@ -8,3 +8,5 @@ data:
   DB_HOST: "mysql-service"
   DB_PORT: "3306"
   BACKEND_PORT: "8080"
+  CORS_ALLOW_ORIGINS: "http://192.168.49.2:30080"
+  REACT_APP_API_BASE_URL: "http://192.168.49.2:30081"
