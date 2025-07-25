@@ -10,18 +10,18 @@ import (
 
 func JWTMiddleware(secretKey string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authHeader := c.GetHeader("Cookie")
+		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
 			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Authorization header missing"})
 			return
 		}
 
-		parts := strings.Split(authHeader, ";")
+		parts := strings.Split(authHeader, ",")
 
 		var tokenString string
 		for _, part := range parts {
-			if strings.HasPrefix(part, "auth_token=") {
-				tokenString = strings.TrimPrefix(part, "auth_token=")
+			if strings.HasPrefix(part, "Bearer ") {
+				tokenString = strings.TrimPrefix(part, "Bearer ")
 				break
 			}
 		}
