@@ -1,6 +1,6 @@
 // API configuration utility
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
-console.log("Backend Url: " + API_BASE_URL)
+const API_BASE_URL = ''; // nginx proxy will handle this
+console.log("Backend Url: " + (API_BASE_URL || 'nginx proxy'))
 
 // Helper function to get cookie
 const getCookie = (name) => {
@@ -56,22 +56,22 @@ export const authenticatedFetch = async (url, options = {}) => {
 
 export const API_ENDPOINTS = {
   // Auth endpoints (no JWT required)
-  LOGIN: `${API_BASE_URL}/api/auth/login`,
+  LOGIN: `/api/auth/login`,
 
   // Todo endpoints (JWT required)
-  TODOS: `${API_BASE_URL}/api/todos`,
-  TODO_BY_ID: (id) => `${API_BASE_URL}/api/todos/${id}`,
+  TODOS: `/api/todos`,
+  TODO_BY_ID: (id) => `/api/todos/${id}`,
 
   // Step endpoints (JWT required)
-  STEPS: `${API_BASE_URL}/api/steps`,
-  STEPS_BY_TODO_ID: (todoId) => `${API_BASE_URL}/api/steps/todo/${todoId}`,
-  STEP_BY_ID: (stepId) => `${API_BASE_URL}/api/steps/${stepId}`,
+  STEPS: `/api/steps`,
+  STEPS_BY_TODO_ID: (todoId) => `/api/steps/todo/${todoId}`,
+  STEP_BY_ID: (stepId) => `/api/steps/${stepId}`,
 
   // Legacy endpoints (for backward compatibility - can be removed after full React migration)
   LEGACY: {
-    INDEX: `${API_BASE_URL}/legacy/`,
-    TODO: `${API_BASE_URL}/legacy/todo`,
-    STEP: (todoId) => `${API_BASE_URL}/legacy/todo/${todoId}`
+    INDEX: `/legacy/`,
+    TODO: `/legacy/todo`,
+    STEP: (todoId) => `/legacy/todo/${todoId}`
   }
 };
 
