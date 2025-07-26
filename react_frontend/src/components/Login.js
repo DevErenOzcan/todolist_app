@@ -26,10 +26,14 @@ const Login = () => {
       if (response.ok) {
         const data = await response.json();
 
-        // Set cookies with the same configuration as your original code
-        const cookieOptions = `path=/; max-age=${60 * 60 * 24}; secure; samesite=strict`;
+        // LAN'da çalışması için cookie ayarlarını düzenle
+        // Secure flag'ini kaldır ve samesite'ı lax yap
+        const cookieOptions = `path=/; max-age=${60 * 60 * 24}; samesite=lax`;
         document.cookie = `auth_token=${data.token}; ${cookieOptions}`;
         document.cookie = `username=${data.username}; ${cookieOptions}`;
+
+        // Debug: Cookie'lerin ayarlandığını kontrol et
+        console.log('Cookies set:', document.cookie);
 
         // Navigate to todo page using React Router
         navigate('/todo');

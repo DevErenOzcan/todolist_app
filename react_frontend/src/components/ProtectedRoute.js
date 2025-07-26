@@ -2,6 +2,7 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 
 const ProtectedRoute = ({ children }) => {
+  // Get cookie function
   const getCookie = (name) => {
     const cookies = document.cookie.split(';');
     for (let cookie of cookies) {
@@ -13,9 +14,11 @@ const ProtectedRoute = ({ children }) => {
     return null;
   };
 
-  const authToken = getCookie('auth_token');
+  const token = getCookie('auth_token');
+  const username = getCookie('username');
 
-  if (!authToken) {
+  if (!token || !username) {
+    console.log('No authentication found, redirecting to login');
     return <Navigate to="/" replace />;
   }
 

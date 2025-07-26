@@ -1,5 +1,6 @@
 // API configuration utility
-const API_BASE_URL = "http://192.168.49.2:30081"
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
+console.log("Backend Url: " + API_BASE_URL)
 
 // Helper function to get cookie
 const getCookie = (name) => {
@@ -39,7 +40,18 @@ export const authenticatedFetch = async (url, options = {}) => {
     };
   }
 
-  return fetch(url, defaultOptions);
+  // Debug: Log request details
+  console.log('Making authenticated request to:', url);
+  console.log('Request options:', defaultOptions);
+  console.log('Current cookies:', document.cookie);
+
+  const response = await fetch(url, defaultOptions);
+
+  // Debug: Log response
+  console.log('Response status:', response.status);
+  console.log('Response headers:', Object.fromEntries(response.headers.entries()));
+
+  return response;
 };
 
 export const API_ENDPOINTS = {
